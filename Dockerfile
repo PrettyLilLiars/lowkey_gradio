@@ -1,30 +1,29 @@
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
-EXPOSE 7860
+# Stage 1: Build
+FROM python:3.10.10-slim as builder
 
-ENV CONDA_DIR /opt/conda
-RUN apt-get update && \
-    apt-get install -y build-essential  && \
-    apt-get install -y wget && \
-    apt-get install -y libgl1-mesa-glx && \
-    apt-get install -y libglib2.0-0 && \
-    apt-get install -y git && \
+RUN apt update && \
+    apt install --no-install-recommends -y build-essential gcc git
+
+COPY requirements.txt /requirements.txt
+
+RUN pip install --no-cache-dir --no-warn-script-location --user -r requirements.txt
+
+# Stage 2: Runtime
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+ENV GRADIO_SERVER_NAME=0.0.0.0
+
+RUN apt update && \
+    apt install --no-install-recommends -y python3 python3-pip libgl1-mesa-glx libglib2.0-0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-     /bin/bash ~/miniconda.sh -b -p /opt/conda
+COPY models/ /models
+COPY util/ /util
+COPY backbone/ /backbone
+COPY align/ /align
+COPY app.py app.py
 
-ENV PATH=$CONDA_DIR/bin:$PATH
+COPY --from=builder /root/.local/lib/python3.10/site-packages /root/.local/lib/python3.10/site-packages
 
-ENV GRADIO_SERVER_NAME=0.0.0.0
-WORKDIR /workspace
-
-ADD requirements.txt /workspace/requirements.txt
-RUN pip install -r requirements.txt
-
-COPY models/ /workspace/models
-COPY util/ /workspace/util
-COPY backbone/ /workspace/backbone
-COPY align/ /workspace/align
-ADD app.py /workspace/
-CMD [ "python" , "/workspace/app.py" ]
+CMD [ "python3" , "-u", "app.py" ]
+EXPOSE 7860

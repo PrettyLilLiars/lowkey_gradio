@@ -75,4 +75,5 @@ def protect(img):
   img_attacked_pil = transforms.ToPILImage()(img_attacked[0])
   return img_attacked_pil
 
-gr.Interface(fn=protect, inputs=gr.inputs.Image(shape=(512,512)), outputs=gr.outputs.Image(type="pil")).launch()
+gr.Interface(fn=protect, inputs=gr.inputs.Image(shape=(512,512)),
+                         outputs=gr.outputs.Image(type="pil"), allow_flagging="never").launch(show_error=True, quiet=False)
