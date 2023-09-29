@@ -1,10 +1,10 @@
 # Stage 1: Build
-FROM python:3.10.10-slim as builder
+FROM python:3.10.12-slim as builder
 
 RUN apt update && \
     apt install --no-install-recommends -y build-essential gcc git
 
-COPY requirements.txt /requirements.txt
+COPY requirements-min.txt /requirements.txt
 
 RUN pip install --no-cache-dir --no-warn-script-location --user -r requirements.txt
 
