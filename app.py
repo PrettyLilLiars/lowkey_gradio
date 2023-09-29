@@ -10,6 +10,7 @@ from align.align_trans import get_reference_facial_points, warp_and_crop_face
 import torchvision.transforms as transforms
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
 to_tensor = transforms.ToTensor()
 
 eps = 0.05
@@ -75,5 +76,5 @@ def protect(img):
   img_attacked_pil = transforms.ToPILImage()(img_attacked[0])
   return img_attacked_pil
 
-gr.Interface(fn=protect, inputs=gr.inputs.Image(shape=(512,512)),
-                         outputs=gr.outputs.Image(type="pil"), allow_flagging="never").launch(show_error=True, quiet=False)
+gr.Interface(fn=protect, inputs=gr.components.Image(shape=(512,512)),
+                         outputs=gr.components.Image(type="pil"), allow_flagging="never").launch(show_error=True, quiet=False, share=True)
